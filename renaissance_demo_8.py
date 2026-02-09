@@ -4,135 +4,183 @@ import time
 
 # --- 1. Configuration ---
 st.set_page_config(
-    page_title="Renaissance Unified Demo",
-    layout="wide",
+    page_title="Renaissance Pro Demo",
+    layout="wide", # Ensures full-screen utilization
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS to mimic the sleek UI from your reference
+# Custom CSS for high-end interactivity
 st.markdown("""
 <style>
-    .bank-badge {
-        background-color: #FFF0E6;
-        color: #FF4B00;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: bold;
-        margin-left: 10px;
+    /* Full-width container styling */
+    .main-payment-box {
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid #f0f0f0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    .payment-card {
-        border: 1px solid #E6E6E6;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 10px;
+    
+    /* Interactive Hover Effect for Payment Methods */
+    .payment-option-card {
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #eee;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin-bottom: 15px;
+    }
+    .payment-option-card:hover {
+        border-color: #FF4B00;
+        background-color: #fff9f6;
+        transform: translateY(-2px);
+    }
+
+    /* Reference Image Badge Styling */
+    .bank-badge {
+        background-color: #FF4B00;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    /* Bank Color Row from your reference */
+    .bank-dot {
+        height: 15px;
+        width: 15px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 2. Data (6 Items for Full Grid) ---
-ART_DATA = [
-    {"ID": 1, "Title": "Digital Sunset", "Artist": "Alex Turner", "Price": 550, "AR": True, "Cat": "Abstract", "Img": "https://placehold.co/600x400/228B22/FFFFFF?text=Sunset"},
-    {"ID": 2, "Title": "The Iron Muse", "Artist": "Maria Rodriguez", "Price": 12000, "AR": True, "Cat": "Modern", "Img": "https://placehold.co/600x400/8B4513/FFFFFF?text=Sculpture"},
-    {"ID": 3, "Title": "A Quiet Day", "Artist": "John Smith", "Price": 150, "AR": False, "Cat": "Landscape", "Img": "https://placehold.co/600x400/1E90FF/FFFFFF?text=Painting"},
-    {"ID": 4, "Title": "Neon Dreams", "Artist": "Sarah Chen", "Price": 850, "AR": True, "Cat": "Cyberpunk", "Img": "https://placehold.co/600x400/FF00FF/FFFFFF?text=Neon"},
-    {"ID": 5, "Title": "Marble Echo", "Artist": "David Stone", "Price": 4200, "AR": False, "Cat": "Modern", "Img": "https://placehold.co/600x400/708090/FFFFFF?text=Marble"},
-    {"ID": 6, "Title": "Fragmented Soul", "Artist": "Elena Rossi", "Price": 3100, "AR": True, "Cat": "Abstract", "Img": "https://placehold.co/600x400/4B0082/FFFFFF?text=Abstract"}
-]
-
+# --- 2. Data Persistence ---
 if 'cart' not in st.session_state:
     st.session_state.cart = []
 
-# --- 3. Page 1: Art Discovery Portal ---
+# Mock Art Data (Expanded to 6 for the grid)
+ART_DATA = [
+    {"ID": 1, "Title": "Digital Sunset", "Artist": "Alex Turner", "Price": 550, "Img": "https://placehold.co/600x400/228B22/FFFFFF?text=Sunset"},
+    {"ID": 2, "Title": "The Iron Muse", "Artist": "Maria Rodriguez", "Price": 12000, "Img": "https://placehold.co/600x400/8B4513/FFFFFF?text=Sculpture"},
+    {"ID": 3, "Title": "A Quiet Day", "Artist": "John Smith", "Price": 150, "Img": "https://placehold.co/600x400/1E90FF/FFFFFF?text=Painting"},
+    {"ID": 4, "Title": "Neon Dreams", "Artist": "Sarah Chen", "Price": 850, "Img": "https://placehold.co/600x400/FF00FF/FFFFFF?text=Neon"},
+    {"ID": 5, "Title": "Marble Echo", "Artist": "David Stone", "Price": 4200, "Img": "https://placehold.co/600x400/708090/FFFFFF?text=Marble"},
+    {"ID": 6, "Title": "Fragmented Soul", "Artist": "Elena Rossi", "Price": 3100, "Img": "https://placehold.co/600x400/4B0082/FFFFFF?text=Abstract"}
+]
+
+# --- 3. Page: Art Discovery ---
 def page_art_discovery():
     st.title("🎨 Art Discovery Portal")
     
-    # Filter Bar
-    with st.container(border=True):
-        c1, c2, c3 = st.columns([2, 1, 1])
-        search = c1.text_input("🔍 Search Artist or Title", placeholder="Start typing...")
-        price_range = c2.slider("Price Range (ZAR)", 0, 15000, (0, 15000))
-        cat = c3.selectbox("Category", ["All"] + list(set(i['Cat'] for i in ART_DATA)))
-
-    filtered = [
-        i for i in ART_DATA if (search.lower() in i['Title'].lower() or search.lower() in i['Artist'].lower())
-        and (price_range[0] <= i['Price'] <= price_range[1])
-        and (cat == "All" or i['Cat'] == cat)
-    ]
-
+    # Wide Search Bar
+    search = st.text_input("🔍 Search unique collections...", placeholder="Search Artist, Title, or Medium")
+    
     st.divider()
     
-    # Clean 2x3 Grid
+    # 3-Column Responsive Grid
     cols = st.columns(3)
-    for idx, item in enumerate(filtered):
-        with cols[idx % 3]:
-            with st.container(border=True):
-                st.image(item['Img'], use_column_width=True)
-                st.subheader(item['Title'])
-                st.write(f"**{item['Artist']}** | :green[ZAR {item['Price']:,}]")
-                if st.button("Add to Cart", key=f"add_{item['ID']}", use_container_width=True):
-                    st.session_state.cart.append(item)
-                    st.toast(f"Added {item['Title']}!", icon="🛒")
+    for idx, item in enumerate(ART_DATA):
+        if search.lower() in item['Title'].lower() or search.lower() in item['Artist'].lower():
+            with cols[idx % 3]:
+                with st.container(border=True):
+                    st.image(item['Img'], use_column_width=True)
+                    st.subheader(item['Title'])
+                    st.write(f"By {item['Artist']} — **ZAR {item['Price']:,}**")
+                    if st.button("Add to Collection", key=f"add_{item['ID']}", use_container_width=True):
+                        st.session_state.cart.append(item)
+                        st.toast(f"{item['Title']} added!", icon="✅")
 
-# --- 4. Page 2: Cart & Checkout (THE PICTURE REPLICA) ---
+# --- 4. Page: Cart & Checkout (Interactive & Expanded) ---
 def page_cart_checkout():
     if not st.session_state.cart:
-        st.title("💳 Checkout")
-        st.info("Your cart is empty.")
+        st.info("Your cart is empty. Start your collection in the portal!")
         return
 
-    # Total Calculation
     total_val = sum(item['Price'] for item in st.session_state.cart)
 
-    # UI starts here - Centered "Mobile" look
-    _, center_col, _ = st.columns([1, 1.5, 1])
+    # Layout: Horizontal Expansion
+    st.markdown("### 💳 Checkout Strategy")
     
-    with center_col:
-        st.markdown("### ← Add money")
-        st.caption("Amount (ZAR)")
-        st.markdown(f"# {total_val:,.2f}")
-        
-        # Preset buttons like in the image
-        st.write("` 100 ` ` 200 ` ` 500 ` ` Own amount `")
-        
-        st.divider()
+    main_col1, main_col2 = st.columns([1, 2], gap="large")
 
-        # "Pay by bank" section (Recommended)
-        st.markdown(f"⚡ **Pay by bank** <span class='bank-badge'>Recommended</span>", unsafe_allow_html=True)
-        st.write("Make a **fast, secure** payment from your bank account. Pay in one click every time.")
-        
-        # Simulated Bank Icons
-        st.markdown("🟥 🟦 🟩 🟨 🟧")
-        st.caption("Add bank references so users know upfront whether this is a payment method they can use.")
-        
+    with main_col1:
+        st.subheader("Your Selection")
+        for idx, item in enumerate(st.session_state.cart):
+            with st.expander(f"{item['Title']} - ZAR {item['Price']:,}", expanded=False):
+                st.image(item['Img'])
+                if st.button("Remove Item", key=f"del_{idx}"):
+                    st.session_state.cart.pop(idx)
+                    st.rerun()
         st.divider()
+        st.metric("Total Payable", f"ZAR {total_val:,.2f}")
 
-        # Other Options
-        st.markdown("💳 **Card** `VISA` `Mastercard` ")
-        st.divider()
-        st.markdown("🏦 **Capitec Pay**")
-        st.divider()
-        st.markdown("🏛️ **Manual EFT**")
-        st.write("")
+    with main_col2:
+        # Mimicking the Reference Image UI logic with interactivity
+        st.markdown("""
+            <div style='text-align: left; margin-bottom: 20px;'>
+                <span style='color: #666;'>← Add money</span><br>
+                <span style='font-size: 14px; color: #888;'>Amount (ZAR)</span>
+            </div>
+        """, unsafe_allow_html=True)
         
-        if st.button("Continue", type="primary", use_container_width=True):
-            with st.status("Processing Pay by Bank...", expanded=True) as status:
-                st.write("Connecting to South African banking gateway...")
-                time.sleep(1.5)
-                status.update(label="Transaction Complete!", state="complete", expanded=False)
-            st.balloons()
-            st.session_state.cart = []
-            st.success("Art secured! Check your profile for certificates.")
+        st.markdown(f"<h1 style='margin-top: -20px;'>{total_val:,.2f}</h1>", unsafe_allow_html=True)
+        
+        # Interactive Tabs to replace the "Wasted Space" subsections
+        tab_bank, tab_card, tab_others = st.tabs(["⚡ Pay by Bank", "💳 Card Payment", "🏛️ Alternative Methods"])
 
-# --- Main App Logic ---
+        with tab_bank:
+            st.markdown(f"""
+                <div class="payment-option-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: bold; font-size: 18px;">Pay by bank</span>
+                        <span class="bank-badge">Recommended</span>
+                    </div>
+                    <p style="color: #444; margin-top: 10px;">Make a <b>fast, secure</b> payment from your bank account. Pay in one click every time.</p>
+                    <div style="margin: 15px 0;">
+                        <span class="bank-dot" style="background-color: #E21E26;"></span>
+                        <span class="bank-dot" style="background-color: #0069B3;"></span>
+                        <span class="bank-dot" style="background-color: #009639;"></span>
+                        <span class="bank-dot" style="background-color: #FFCD00;"></span>
+                        <span class="bank-dot" style="background-color: #000000;"></span>
+                    </div>
+                    <p style="font-size: 12px; color: #888;">Add bank references so users know upfront whether this is a payment method they can use.</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button("Confirm & Pay via Bank", type="primary", use_container_width=True):
+                with st.status("Linking to Secure Banking Gateway...", expanded=True) as s:
+                    time.sleep(1)
+                    s.update(label="Payment Verified!", state="complete")
+                st.balloons()
+                st.session_state.cart = []
+                st.rerun()
+
+        with tab_card:
+            st.write("Securely pay using your Visa or Mastercard.")
+            c_col1, c_col2 = st.columns(2)
+            c_col1.text_input("Card Number", placeholder="0000 0000 0000 0000")
+            c_col2.text_input("CVV", placeholder="123")
+            st.button("Pay with Card", use_container_width=True)
+
+        with tab_others:
+            st.markdown("### Capitec Pay")
+            st.write("Instant approval via your Capitec App.")
+            st.button("Link Capitec Account", use_container_width=True)
+            st.divider()
+            st.markdown("### Manual EFT")
+            st.info("Banking details will be emailed to you. Artwork released upon clearance.")
+
+# --- Navigation ---
 def main():
-    st.sidebar.title("⚜️ Renaissance")
-    pg = st.sidebar.radio("Navigate", ["Art Discovery Portal", "Cart & Checkout"])
+    pg = st.sidebar.radio("Navigation", ["Art Discovery Portal", "Cart & Checkout"])
     st.sidebar.divider()
-    st.sidebar.metric("Cart", f"{len(st.session_state.cart)} Items")
-
+    st.sidebar.metric("Cart Count", len(st.session_state.cart))
+    
     if pg == "Art Discovery Portal": page_art_discovery()
-    elif pg == "Cart & Checkout": page_cart_checkout()
+    else: page_cart_checkout()
 
 if __name__ == "__main__":
     main()
