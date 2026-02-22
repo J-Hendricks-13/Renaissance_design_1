@@ -61,6 +61,91 @@ st.markdown("""
 if 'cart' not in st.session_state:
     st.session_state.cart = []
 
+# --- 1. Data Logic for Transactions ---
+if 'ledger' not in st.session_state:
+    st.session_state.ledger = []
+
+# --- 2. The Financial Operations Page ---
+def page_financial_ops():
+    st.title("📑 Financial Operations")
+    st.markdown("### Transaction Ledger & Tax Invoicing")
+
+    if not st.session_state.ledger:
+        st.info("No transactions found. Complete a purchase to generate financial records.")
+        return
+
+    # Top Level Metrics for Business Reporting
+    m1, m2, m3 = st.columns(3)
+    total_turnover = sum(txn['total'] for txn in st.session_state.ledger)
+    total_vat = sum(txn['vat'] for txn in st.session_state.ledger)
+    m1.metric("Total Settlement", f"ZAR {total_turnover:,.2f}")
+    m2.metric("VAT Liabilities (15%)", f"ZAR {total_vat:,.2f}")
+    m3.metric("Settlement Success Rate", "100%", delta="Verified")
+
+    st.divider()
+
+    # Main Business View
+    col_ledger, col_invoice = st.columns([1.5, 1], gap="large")
+
+    with col_ledger:
+        st.subheader("Transaction Ledger")
+        # Creating a professional table-like header
+        st.markdown("""
+            <div style="display: flex; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px;">
+                <div style="flex: 2;">Reference / Date</div>
+                <div style="flex: 1;">Status</div>
+                <div style="flex: 1; text-align: right;">Amount</div>
+            </div>
+        """, unsafe_allow_html=True)
+
+        for idx, txn in enumerate(st.session_state.ledger):
+            # Selectable Row Logic
+            with st.container(border=True):
+                c1, c2, c3 = st.columns([2, 1, 1])
+                c1.write(f"**{txn['ref']}**\n\n{txn['date']}")
+                
+                # Status Badges
+                status_color = "green" if txn['status'] == "Settled" else "orange"
+                c2.markdown(f":{status_color}[{txn['status']}]")
+                
+                c3.markdown(f"<div style='text-align: right; font-weight: bold;'>ZAR {txn['total']:,.2f}</div>", unsafe_allow_html=True)
+                
+                if st.button("Generate Invoice", key=f"view_{idx}", use_container_width=True):
+                    st.session_state.active_invoice = txn
+
+    with col_invoice:
+        st.subheader("Invoice Preview")
+        if 'active_invoice' in st.session_state:
+            inv = st.session_state.active_invoice
+            # Professional Invoice UI
+            with st.container(border=True):
+                st.markdown(f"""
+                    <div style="font-family: sans-serif; padding: 10px;">
+                        <h2 style="color: #FF4B00;">RENAISSANCE</h2>
+                        <p style="font-size: 12px;">Tax Invoice: <b>{inv['ref']}</b><br>Date: {inv['date']}</p>
+                        <hr>
+                        <table style="width: 100%; font-size: 14px;">
+                            <tr>
+                                <td style="text-align: left;">Subtotal (Excl. VAT)</td>
+                                <td style="text-align: right;">ZAR {inv['subtotal']:,.2f}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left;">VAT (15.0%)</td>
+                                <td style="text-align: right;">ZAR {inv['vat']:,.2f}</td>
+                            </tr>
+                            <tr style="font-weight: bold; border-top: 1px solid #eee;">
+                                <td style="text-align: left; padding-top: 10px;">Total (Incl. VAT)</td>
+                                <td style="text-align: right; padding-top: 10px;">ZAR {inv['total']:,.2f}</td>
+                            </tr>
+                        </table>
+                        <br>
+                        <p style="font-size: 10px; color: #888;">Payment Method: Pay by Bank (FNB/Absa/Nedbank Gateway)</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                st.button("📥 Download PDF Archive", use_container_width=True)
+        else:
+            st.info("Select a transaction from the ledger to preview the official tax invoice.")
+
 # Mock Art Data (Expanded to 6 for the grid)
 ART_DATA = [
     {"ID": 1, "Title": "Digital Sunset", "Artist": "Alex Turner", "Price": 550, "Img": "https://placehold.co/600x400/228B22/FFFFFF?text=Sunset"},
