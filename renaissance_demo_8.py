@@ -5,14 +5,13 @@ import time
 # --- 1. Configuration ---
 st.set_page_config(
     page_title="Renaissance Pro Demo",
-    layout="wide", # Ensures full-screen utilization
+    layout="wide", 
     initial_sidebar_state="expanded"
 )
 
 # Custom CSS for high-end interactivity
 st.markdown("""
 <style>
-    /* Full-width container styling */
     .main-payment-box {
         background-color: #ffffff;
         padding: 30px;
@@ -20,8 +19,6 @@ st.markdown("""
         border: 1px solid #f0f0f0;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    
-    /* Interactive Hover Effect for Payment Methods */
     .payment-option-card {
         padding: 20px;
         border-radius: 12px;
@@ -35,8 +32,6 @@ st.markdown("""
         background-color: #fff9f6;
         transform: translateY(-2px);
     }
-
-    /* Reference Image Badge Styling */
     .bank-badge {
         background-color: #FF4B00;
         color: white;
@@ -45,8 +40,6 @@ st.markdown("""
         font-size: 12px;
         font-weight: 600;
     }
-    
-    /* Bank Color Row from your reference */
     .bank-dot {
         height: 15px;
         width: 15px;
@@ -60,93 +53,10 @@ st.markdown("""
 # --- 2. Data Persistence ---
 if 'cart' not in st.session_state:
     st.session_state.cart = []
-
-# --- 1. Data Logic for Transactions ---
 if 'ledger' not in st.session_state:
     st.session_state.ledger = []
 
-# --- 2. The Financial Operations Page ---
-def page_financial_ops():
-    st.title("📑 Financial Operations")
-    st.markdown("### Transaction Ledger & Tax Invoicing")
-
-    if not st.session_state.ledger:
-        st.info("No transactions found. Complete a purchase to generate financial records.")
-        return
-
-    # Top Level Metrics for Business Reporting
-    m1, m2, m3 = st.columns(3)
-    total_turnover = sum(txn['total'] for txn in st.session_state.ledger)
-    total_vat = sum(txn['vat'] for txn in st.session_state.ledger)
-    m1.metric("Total Settlement", f"ZAR {total_turnover:,.2f}")
-    m2.metric("VAT Liabilities (15%)", f"ZAR {total_vat:,.2f}")
-    m3.metric("Settlement Success Rate", "100%", delta="Verified")
-
-    st.divider()
-
-    # Main Business View
-    col_ledger, col_invoice = st.columns([1.5, 1], gap="large")
-
-    with col_ledger:
-        st.subheader("Transaction Ledger")
-        # Creating a professional table-like header
-        st.markdown("""
-            <div style="display: flex; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px;">
-                <div style="flex: 2;">Reference / Date</div>
-                <div style="flex: 1;">Status</div>
-                <div style="flex: 1; text-align: right;">Amount</div>
-            </div>
-        """, unsafe_allow_html=True)
-
-        for idx, txn in enumerate(st.session_state.ledger):
-            # Selectable Row Logic
-            with st.container(border=True):
-                c1, c2, c3 = st.columns([2, 1, 1])
-                c1.write(f"**{txn['ref']}**\n\n{txn['date']}")
-                
-                # Status Badges
-                status_color = "green" if txn['status'] == "Settled" else "orange"
-                c2.markdown(f":{status_color}[{txn['status']}]")
-                
-                c3.markdown(f"<div style='text-align: right; font-weight: bold;'>ZAR {txn['total']:,.2f}</div>", unsafe_allow_html=True)
-                
-                if st.button("Generate Invoice", key=f"view_{idx}", use_container_width=True):
-                    st.session_state.active_invoice = txn
-
-    with col_invoice:
-        st.subheader("Invoice Preview")
-        if 'active_invoice' in st.session_state:
-            inv = st.session_state.active_invoice
-            # Professional Invoice UI
-            with st.container(border=True):
-                st.markdown(f"""
-                    <div style="font-family: sans-serif; padding: 10px;">
-                        <h2 style="color: #FF4B00;">RENAISSANCE</h2>
-                        <p style="font-size: 12px;">Tax Invoice: <b>{inv['ref']}</b><br>Date: {inv['date']}</p>
-                        <hr>
-                        <table style="width: 100%; font-size: 14px;">
-                            <tr>
-                                <td style="text-align: left;">Subtotal (Excl. VAT)</td>
-                                <td style="text-align: right;">ZAR {inv['subtotal']:,.2f}</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align: left;">VAT (15.0%)</td>
-                                <td style="text-align: right;">ZAR {inv['vat']:,.2f}</td>
-                            </tr>
-                            <tr style="font-weight: bold; border-top: 1px solid #eee;">
-                                <td style="text-align: left; padding-top: 10px;">Total (Incl. VAT)</td>
-                                <td style="text-align: right; padding-top: 10px;">ZAR {inv['total']:,.2f}</td>
-                            </tr>
-                        </table>
-                        <br>
-                        <p style="font-size: 10px; color: #888;">Payment Method: Pay by Bank (FNB/Absa/Nedbank Gateway)</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                st.button("📥 Download PDF Archive", use_container_width=True)
-        else:
-            st.info("Select a transaction from the ledger to preview the official tax invoice.")
-
-# Mock Art Data (Expanded to 6 for the grid)
+# Mock Art Data
 ART_DATA = [
     {"ID": 1, "Title": "Digital Sunset", "Artist": "Alex Turner", "Price": 550, "Img": "https://placehold.co/600x400/228B22/FFFFFF?text=Sunset"},
     {"ID": 2, "Title": "The Iron Muse", "Artist": "Maria Rodriguez", "Price": 12000, "Img": "https://placehold.co/600x400/8B4513/FFFFFF?text=Sculpture"},
@@ -159,13 +69,9 @@ ART_DATA = [
 # --- 3. Page: Art Discovery ---
 def page_art_discovery():
     st.title("🎨 Art Discovery Portal")
-    
-    # Wide Search Bar
     search = st.text_input("🔍 Search unique collections...", placeholder="Search Artist, Title, or Medium")
-    
     st.divider()
     
-    # 3-Column Responsive Grid
     cols = st.columns(3)
     for idx, item in enumerate(ART_DATA):
         if search.lower() in item['Title'].lower() or search.lower() in item['Artist'].lower():
@@ -178,7 +84,7 @@ def page_art_discovery():
                         st.session_state.cart.append(item)
                         st.toast(f"{item['Title']} added!", icon="✅")
 
-# --- 4. Page: Cart & Checkout (Interactive & Expanded) ---
+# --- 4. Page: Cart & Checkout ---
 def page_cart_checkout():
     if not st.session_state.cart:
         st.info("Your cart is empty. Start your collection in the portal!")
@@ -186,15 +92,13 @@ def page_cart_checkout():
 
     total_val = sum(item['Price'] for item in st.session_state.cart)
 
-    # Layout: Horizontal Expansion
     st.markdown("### 💳 Checkout Strategy")
-    
     main_col1, main_col2 = st.columns([1, 2], gap="large")
 
     with main_col1:
         st.subheader("Your Selection")
         for idx, item in enumerate(st.session_state.cart):
-            with st.expander(f"{item['Title']} - ZAR {item['Price']:,}", expanded=False):
+            with st.expander(f"{item['Title']} - ZAR {item['Price']:,}"):
                 st.image(item['Img'])
                 if st.button("Remove Item", key=f"del_{idx}"):
                     st.session_state.cart.pop(idx)
@@ -203,17 +107,9 @@ def page_cart_checkout():
         st.metric("Total Payable", f"ZAR {total_val:,.2f}")
 
     with main_col2:
-        # Mimicking the Reference Image UI logic with interactivity
-        st.markdown("""
-            <div style='text-align: left; margin-bottom: 20px;'>
-                <span style='color: #666;'>← Add money</span><br>
-                <span style='font-size: 14px; color: #888;'>Amount (ZAR)</span>
-            </div>
-        """, unsafe_allow_html=True)
-        
+        st.markdown("<div style='text-align: left; margin-bottom: 20px;'><span style='color: #666;'>← Add money</span><br><span style='font-size: 14px; color: #888;'>Amount (ZAR)</span></div>", unsafe_allow_html=True)
         st.markdown(f"<h1 style='margin-top: -20px;'>{total_val:,.2f}</h1>", unsafe_allow_html=True)
         
-        # Interactive Tabs to replace the "Wasted Space" subsections
         tab_bank, tab_card, tab_others = st.tabs(["⚡ Pay by Bank", "💳 Card Payment", "🏛️ Alternative Methods"])
 
         with tab_bank:
@@ -223,49 +119,98 @@ def page_cart_checkout():
                         <span style="font-weight: bold; font-size: 18px;">Pay by bank</span>
                         <span class="bank-badge">Recommended</span>
                     </div>
-                    <p style="color: #444; margin-top: 10px;">Make a <b>fast, secure</b> payment from your bank account. Pay in one click every time.</p>
+                    <p style="color: #444; margin-top: 10px;">Make a <b>fast, secure</b> payment from your bank account.</p>
                     <div style="margin: 15px 0;">
                         <span class="bank-dot" style="background-color: #E21E26;"></span>
                         <span class="bank-dot" style="background-color: #0069B3;"></span>
                         <span class="bank-dot" style="background-color: #009639;"></span>
                         <span class="bank-dot" style="background-color: #FFCD00;"></span>
-                        <span class="bank-dot" style="background-color: #000000;"></span>
                     </div>
-                    <p style="font-size: 12px; color: #888;">Add bank references so users know upfront whether this is a payment method they can use.</p>
                 </div>
             """, unsafe_allow_html=True)
             
             if st.button("Confirm & Pay via Bank", type="primary", use_container_width=True):
                 with st.status("Linking to Secure Banking Gateway...", expanded=True) as s:
                     time.sleep(1)
+                    # --- BUSINESS LOGIC: SAVE TO LEDGER ---
+                    subtotal = total_val / 1.15
+                    vat_amt = total_val - subtotal
+                    st.session_state.ledger.append({
+                        "ref": f"PAY-BANK-{int(time.time())}",
+                        "date": time.strftime("%Y-%m-%d %H:%M"),
+                        "total": total_val,
+                        "subtotal": subtotal,
+                        "vat": vat_amt,
+                        "status": "Settled"
+                    })
+                    st.session_state.cart = [] # Clear cart after success
                     s.update(label="Payment Verified!", state="complete")
                 st.balloons()
-                st.session_state.cart = []
                 st.rerun()
 
-        with tab_card:
-            st.write("Securely pay using your Visa or Mastercard.")
-            c_col1, c_col2 = st.columns(2)
-            c_col1.text_input("Card Number", placeholder="0000 0000 0000 0000")
-            c_col2.text_input("CVV", placeholder="123")
-            st.button("Pay with Card", use_container_width=True)
+# --- 5. Page: Financial Operations ---
+def page_financial_ops():
+    st.title("📑 Financial Operations")
+    
+    if not st.session_state.ledger:
+        st.info("No transactions found. Complete a purchase to generate financial records.")
+        return
 
-        with tab_others:
-            st.markdown("### Capitec Pay")
-            st.write("Instant approval via your Capitec App.")
-            st.button("Link Capitec Account", use_container_width=True)
-            st.divider()
-            st.markdown("### Manual EFT")
-            st.info("Banking details will be emailed to you. Artwork released upon clearance.")
+    m1, m2, m3 = st.columns(3)
+    total_turnover = sum(txn['total'] for txn in st.session_state.ledger)
+    total_vat = sum(txn['vat'] for txn in st.session_state.ledger)
+    m1.metric("Total Settlement", f"ZAR {total_turnover:,.2f}")
+    m2.metric("VAT Liabilities (15%)", f"ZAR {total_vat:,.2f}")
+    m3.metric("Settlement Success", "100%")
+
+    st.divider()
+    col_ledger, col_invoice = st.columns([1.5, 1], gap="large")
+
+    with col_ledger:
+        st.subheader("Transaction Ledger")
+        for idx, txn in enumerate(st.session_state.ledger):
+            with st.container(border=True):
+                c1, c2, c3 = st.columns([2, 1, 1])
+                c1.write(f"**{txn['ref']}**\n\n{txn['date']}")
+                c2.markdown(f":green[{txn['status']}]")
+                c3.markdown(f"**ZAR {txn['total']:,.2f}**")
+                if st.button("View Invoice", key=f"inv_{idx}", use_container_width=True):
+                    st.session_state.active_invoice = txn
+
+    with col_invoice:
+        st.subheader("Invoice Preview")
+        if 'active_invoice' in st.session_state:
+            inv = st.session_state.active_invoice
+            with st.container(border=True):
+                st.markdown(f"""
+                    <div style="font-family: sans-serif; padding: 10px;">
+                        <h2 style="color: #FF4B00;">RENAISSANCE</h2>
+                        <p style="font-size: 12px;">Tax Invoice: <b>{inv['ref']}</b><br>Date: {inv['date']}</p>
+                        <hr>
+                        <table style="width: 100%; font-size: 14px;">
+                            <tr><td>Subtotal (Excl. VAT)</td><td style="text-align: right;">ZAR {inv['subtotal']:,.2f}</td></tr>
+                            <tr><td>VAT (15.0%)</td><td style="text-align: right;">ZAR {inv['vat']:,.2f}</td></tr>
+                            <tr style="font-weight: bold; border-top: 1px solid #eee;">
+                                <td style="padding-top: 10px;">Total (Incl. VAT)</td>
+                                <td style="text-align: right; padding-top: 10px;">ZAR {inv['total']:,.2f}</td>
+                            </tr>
+                        </table>
+                    </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("Select a transaction to preview.")
 
 # --- Navigation ---
 def main():
-    pg = st.sidebar.radio("Navigation", ["Art Discovery Portal", "Cart & Checkout"])
+    st.sidebar.title("⚜️ Renaissance")
+    # UPDATED NAVIGATION
+    pg = st.sidebar.radio("Navigation", ["Art Discovery Portal", "Cart & Checkout", "Financial Operations"])
     st.sidebar.divider()
     st.sidebar.metric("Cart Count", len(st.session_state.cart))
     
     if pg == "Art Discovery Portal": page_art_discovery()
-    else: page_cart_checkout()
+    elif pg == "Cart & Checkout": page_cart_checkout()
+    elif pg == "Financial Operations": page_financial_ops()
 
 if __name__ == "__main__":
     main()
